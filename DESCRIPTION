@@ -1,0 +1,29 @@
+Package: ASIP
+Type: Package
+Date: 2017-07-11
+Title: Automated Satellite Image Processing
+Version: 0.3
+Author: M J Riyas [aut, cre],
+  T H Syed [aut]
+Maintainer: M J Riyas <riyasmjgeo@gmail.com>
+Description: Perform complex satellite image processes automatically and efficiently. Package currently supports satellite images from most widely used Landsat 4,5,7 and 8 and ASTER L1T data. The primary uses of this package is given below.
+  1. Conversion of optical bands to top of atmosphere reflectance.
+  2. Conversion of thermal bands to corresponding temperature images. 
+  3. Derive application oriented products directly from source satellite image bands.
+  4. Compute user defined equation and produce corresponding image product.
+  5. Other basic tools for satellite image processing.
+  References.
+  i. Chander and Markham (2003) <doi:10.1109/TGRS.2003.818464>.
+  ii. Roy et.al, (2014) <doi:10.1016/j.rse.2014.02.001>.
+  iii. Abrams (2000) <doi:10.1080/014311600210326>.
+License: GPL-3
+Encoding: UTF-8
+Depends: R (>= 3.4.1)
+Imports: raster (>= 2.5-8), utils, gdalUtils (>= 2.0.1.7), rgdal (>=
+        1.2-8)
+LazyData: true
+RoxygenNote: 6.0.1
+NeedsCompilation: no
+Packaged: 2017-07-20 11:54:10 UTC; xplorer
+Repository: CRAN
+Date/Publication: 2017-07-20 12:21:29 UTC
