@@ -76,8 +76,8 @@ crop.bands <- function (directory= getwd(), crop = "n", ext2crop = "none",b1=1,b
     green <- as.integer(raster(paste0(directory,"/",sat_fold,"_B3.TIF")))
     if (crop == "u")
     {
-      stak <- stack(c(nir,red,green))
-      plotRGB(stak)
+      stak <- raster::stack(c(nir,red,green))
+      plotRGB(stak, scale = 65536)
       print("Please define your extent from the map in plot preview for further processing")
       print("You can click on the top left of custom subset region followed by the bottom right")
       ext <- drawExtent()

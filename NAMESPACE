@@ -2,6 +2,7 @@
 
 export(arvi)
 export(aster_bands)
+export(aster_temp)
 export(aster_toa)
 export(crop.bands)
 export(custom.eqn)

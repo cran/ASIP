@@ -1,15 +1,24 @@
 #' Normalized Difference Vegetation Index
 #'
 #' Normalized Difference Vegetation Index (NDVI). It is the most widely used satellite image derived index emphasizing on vegetation mapping.
+#' This function can also be used to obtain the ground emissivity as well.
 #' @param ext2crop,crop,directory Same as mentioned in \code{\link[ASIP]{arvi}}.
+#' @param emissivity Assign value "y" to get the emissivity of the surface as a seperate raster file.
 #' @return File named ndvi_'date of satellite image acqisition'.tif in the input folder
 #' @note 1. NDVI= (r_nir - r_red)/(r_nir + r_red)
 #'
 #' where, "r_" denotes TOA reflectance band.
 #'
-#' Other important notes are mentioned in \code{\link[ASIP]{custom.eqn}}.
+#' 2. Emissivity is calculated according to \href{http://www.tandfonline.com/doi/abs/10.1080/01431169308904400}{Van De Griend and Owe (1993)}.
+#'
+#' 3. Emissivity values will be absent on pixels with negative NDVI values. This can affect the land surface temperature results (not at-sensor brightness temperature) as well.
+#' So, please review the study region and the requirements before using this function.
+#'
+#' 4. Other important notes are mentioned in \code{\link[ASIP]{custom.eqn}}.
 #' @export
-#' @references \href{http://www.sciencedirect.com/science/article/pii/0034425787900381}{Huetet A R and Jackson R D (1987) Suitability of spectral indices for evaluating vegetation characteristics on arid rangelands, Remote sensing of environment, 23(2), pp:213-232. doi: 10.1016/0034-4257(87)90038-1.}
+#' @references 1. \href{http://www.sciencedirect.com/science/article/pii/0034425787900381}{Huetet A R and Jackson R D (1987) Suitability of spectral indices for evaluating vegetation characteristics on arid rangelands, Remote sensing of environment, 23(2), pp:213-232. doi: 10.1016/0034-4257(87)90038-1.}
+#'
+#' 2. \href{http://www.tandfonline.com/doi/abs/10.1080/01431169308904400}{Van De Griend AA, Owe M (1993) On the relationship between thermal emissivity and the normalized difference vegetation index for natural surfaces. Int J Remote Sens 14:1119–1131. doi: 10.1080/01431169308904400}
 #' @importFrom raster raster writeRaster extent mask crop
 #' @importFrom utils tail
 #' @examples
@@ -21,7 +30,7 @@
 #' shapefil <- paste0 (path, "/test.shp")
 #' ndvi (directory = path, crop = "y", ext2crop = shapefil)
 # ndvi function
-ndvi <- function(directory = getwd(), crop = "n", ext2crop = "none")
+ndvi <- function(directory = getwd(), crop = "n", ext2crop = "none", emissivity = "n")
 {
   # If the directory is not set
   bands <- length(list.files(directory,pattern = "*TIF"))
@@ -74,8 +83,8 @@ ndvi <- function(directory = getwd(), crop = "n", ext2crop = "none")
       b5 <- raster (paste0 (directory, "/", sat_fold, "_B5.TIF"))
       b4 <- raster (paste0 (directory, "/", sat_fold, "_B4.TIF"))
       b3 <- raster (paste0 (directory, "/", sat_fold, "_B3.TIF"))
-      stak <- stack(c(b5,b4,b3))
-      plotRGB(stak)
+      stak <- raster::stack(c(b5,b4,b3))
+      plotRGB(stak, scale = 65536)
       print("Please define your extent from the map in plot preview for further processing")
       print("You can click on the top left of custom subset region followed by the bottom right")
       ext <- drawExtent()
@@ -283,6 +292,15 @@ ndvi <- function(directory = getwd(), crop = "n", ext2crop = "none")
   }
   ######## Landsat TM ending ############
   ndvi <- (toa_nir-toa_red)/(toa_nir+toa_red)
-  writeRaster(ndvi,paste0(directory,"/","ndvi_",data_aq),format="GTiff", overwrite=TRUE)
+  writeRaster(ndvi,paste0(directory,"/","ndvi_",data_aq), format= "GTiff", overwrite= TRUE)
+
+  # Emissivity
+  if (emissivity != "n")
+  {
+    emis <- 1.0094 + (0.047 * log (ndvi))
+    writeRaster(emis,paste0(directory,"/","emissivity_",data_aq), format= "GTiff", overwrite= TRUE)
+    print ("Emissivity on pixels with negative NDVI values can't be computed. Thereby, those pixels will not have any values in the emissivity file")
+  }
+
   print("Program completed, output is named as 'ndvi_[date of data acquisition].tif' in satellite image folder")
 }

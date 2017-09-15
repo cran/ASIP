@@ -17,7 +17,7 @@
 #'
 #' "f" <- Crop to exact shapefile boundary.
 #' @param ext2crop Path to the shapefile (*.shp) which will be used for cropping. Shapefile should have SAME CORDINATE SYSTEM as the satellite image.
-#' Either provide the full path of .shp file or provide the name of the shapefile variable which is already open.
+#' Either provide the full path of .shp file or provide the name of the shapefile variable which is already opened.
 #' @param gamma It is an aerosol dependant factor. For more details please refer Kaufman and Tanre (1992). By default the value is 1.
 #' @return File named "arvi_'date of satellite image acqisition'.tif" in the input folder.
 #' @note 1. ARVI = (r_nir - rb)/(r_nir + rb), where
@@ -93,8 +93,8 @@ arvi <- function (directory = getwd(), crop = "n", ext2crop = "none", gamma = 1)
       b5 <- raster (paste0 (directory, "/", sat_fold, "_B5.TIF"))
       b4 <- raster (paste0 (directory, "/", sat_fold, "_B4.TIF"))
       b3 <- raster (paste0 (directory, "/", sat_fold, "_B3.TIF"))
-      stak <- stack (c (b5, b4, b3))
-      plotRGB (stak)
+      stak <- raster::stack (c (b5, b4, b3))
+      plotRGB (stak, scale = 65536)
       print ("Please define your extent from the map in plot preview for further processing")
       print ("You can click on the top left of custom subset region followed by the bottom right")
       ext <- drawExtent()

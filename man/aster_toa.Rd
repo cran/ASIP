@@ -35,12 +35,8 @@ Raw code is customized to produce this function with additional functionalities 
 \href{https://asterweb.jpl.nasa.gov/content/03_data/04_Documents/aster_user_guide_v2.pdf}{Abrams M, Hook S, and RAMACHANDRAN B, (1999) Aster user handbook,
 Version 2, NASA/Jet Propulsion Laboratory, Pasadena, CA.}
 
-\href{http://bookshop.europa.eu/en/collection-and-pre-processing-of-noaa-avhrr-1-km-resolution-data-for-tropical-forest-resource-assessment-pbCLNA16055}{Archard F, AND D'Souza G, (1994) Collection and pre-processing of
-NOAA-AVHRR 1km resolution data for tropical forest resource assessment.
-Report EUR 16055, European Commission, Luxembourg.}
-
 \href{http://www.tandfonline.com/doi/abs/10.1080/014311698213768}{Eva H, AND Lambin E F, (1998) Burnt area mapping in Central Africa using
-ATSR data, International Journal of Remote Sensing, 19 (18), 3473-3497. doi:10.1080/014311698213768.}
+ATSER data, International Journal of Remote Sensing, 19 (18), 3473-3497. doi:10.1080/014311698213768.}
 
 \href{http://dx.doi.org/10.1117/12.450668}{Thome, K.J., Biggar, S.F., and Slater, P.N., 2001, Effects of assumed solar
 spectral irradiance on intercomparisons of earth-observing sensors. In

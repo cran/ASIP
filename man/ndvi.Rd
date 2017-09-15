@@ -4,23 +4,32 @@
 \alias{ndvi}
 \title{Normalized Difference Vegetation Index}
 \usage{
-ndvi(directory = getwd(), crop = "n", ext2crop = "none")
+ndvi(directory = getwd(), crop = "n", ext2crop = "none",
+  emissivity = "n")
 }
 \arguments{
 \item{ext2crop, crop, directory}{Same as mentioned in \code{\link[ASIP]{arvi}}.}
+
+\item{emissivity}{Assign value "y" to get the emissivity of the surface as a seperate raster file.}
 }
 \value{
 File named ndvi_'date of satellite image acqisition'.tif in the input folder
 }
 \description{
 Normalized Difference Vegetation Index (NDVI). It is the most widely used satellite image derived index emphasizing on vegetation mapping.
+This function can also be used to obtain the ground emissivity as well.
 }
 \note{
 1. NDVI= (r_nir - r_red)/(r_nir + r_red)
 
 where, "r_" denotes TOA reflectance band.
 
-Other important notes are mentioned in \code{\link[ASIP]{custom.eqn}}.
+2. Emissivity is calculated according to \href{http://www.tandfonline.com/doi/abs/10.1080/01431169308904400}{Van De Griend and Owe (1993)}.
+
+3. Emissivity values will be absent on pixels with negative NDVI values. This can affect the land surface temperature results (not at-sensor brightness temperature) as well.
+So, please review the study region and the requirements before using this function.
+
+4. Other important notes are mentioned in \code{\link[ASIP]{custom.eqn}}.
 }
 \examples{
 library (raster)
@@ -32,5 +41,7 @@ shapefil <- paste0 (path, "/test.shp")
 ndvi (directory = path, crop = "y", ext2crop = shapefil)
 }
 \references{
-\href{http://www.sciencedirect.com/science/article/pii/0034425787900381}{Huetet A R and Jackson R D (1987) Suitability of spectral indices for evaluating vegetation characteristics on arid rangelands, Remote sensing of environment, 23(2), pp:213-232. doi: 10.1016/0034-4257(87)90038-1.}
+1. \href{http://www.sciencedirect.com/science/article/pii/0034425787900381}{Huetet A R and Jackson R D (1987) Suitability of spectral indices for evaluating vegetation characteristics on arid rangelands, Remote sensing of environment, 23(2), pp:213-232. doi: 10.1016/0034-4257(87)90038-1.}
+
+2. \href{http://www.tandfonline.com/doi/abs/10.1080/01431169308904400}{Van De Griend AA, Owe M (1993) On the relationship between thermal emissivity and the normalized difference vegetation index for natural surfaces. Int J Remote Sens 14:1119–1131. doi: 10.1080/01431169308904400}
 }

@@ -47,9 +47,13 @@
 #' dn2toa (path, crop = "f", ext2crop = shapefil, b3=0, b4=0, b5=0, b6 = 0, b7 = 0)
 
 # TOA
-multi.indices <- function (directory = getwd(), crop = "n", ext2crop = "none",arvi=0, gamma=1, gemi=0,gvmi=0,msavi=0,ndbi=0,ndvi=1,ndwi=0,pavi=0,all=0)
+multi.indices <- function (directory = getwd(), crop = "n", ext2crop = "none", arvi=0, gamma=1, gemi=0, gvmi=0, msavi=0, ndbi=0, ndvi=1, ndwi=0, pavi=0, all=0)
 {
   # If the directory is not set
+  if (all == 1)
+  {
+    arvi <- gemi <- gvmi <- msavi <- ndbi <- ndvi <- ndwi <- pavi <- 1
+  }
   bands <- length (list.files(directory,pattern = "*TIF"))
   if (bands == 0)
     stop("Define your satellite image folder path properly")
@@ -102,8 +106,8 @@ multi.indices <- function (directory = getwd(), crop = "n", ext2crop = "none",ar
       b5 <- raster (paste0 (directory, "/", sat_fold, "_B5.TIF"))
       b4 <- raster (paste0 (directory, "/", sat_fold, "_B4.TIF"))
       b3 <- raster (paste0 (directory, "/", sat_fold, "_B3.TIF"))
-      stak <- stack(c(b5,b4,b3))
-      plotRGB(stak)
+      stak <- raster::stack(c(b5,b4,b3))
+      plotRGB(stak, scale = 65536)
       print("Please define your extent from the map in plot preview for further processing")
       print("You can click on the top left of custom subset region followed by the bottom right")
       ext <- drawExtent()
@@ -136,6 +140,7 @@ multi.indices <- function (directory = getwd(), crop = "n", ext2crop = "none",ar
       }
     }
     # Defining bands & toa calculation
+
     if (arvi==1 || gemi==1 || gvmi==1 || msavi==1 || ndbi==1 || ndvi==1 || ndwi==1 || pavi==1)
     {
       b5 <- 1
@@ -228,20 +233,6 @@ multi.indices <- function (directory = getwd(), crop = "n", ext2crop = "none",ar
         }
       }
       toa_blu <- ((blu * blu_refl_mult) + blu_refl_add)/sin(sun_ele*(pi/180))
-    }
-
-    if (b1==1)
-    {
-      aero <- as.integer(raster(paste0(directory,"/",sat_fold,"_B1.TIF")))
-      if (crop == "y" || crop == "f" || crop == "u")
-      {
-        aero <- crop(aero, ext)
-        if (crop=="f")
-        {
-          aero <- mask(aero,shape)
-        }
-      }
-      toa_aero <- ((aero * aero_refl_mult) + aero_refl_add)/sin(sun_ele*(pi/180))
     }
   }
   ########### Landsat-8 ending ##############

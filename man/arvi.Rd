@@ -23,7 +23,7 @@ To define current working directory, either use shortcut key Ctrl+Shift+H  or us
 "f" <- Crop to exact shapefile boundary.}
 
 \item{ext2crop}{Path to the shapefile (*.shp) which will be used for cropping. Shapefile should have SAME CORDINATE SYSTEM as the satellite image.
-Either provide the full path of .shp file or provide the name of the shapefile variable which is already open.}
+Either provide the full path of .shp file or provide the name of the shapefile variable which is already opened.}
 
 \item{gamma}{It is an aerosol dependant factor. For more details please refer Kaufman and Tanre (1992). By default the value is 1.}
 }
