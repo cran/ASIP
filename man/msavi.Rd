@@ -10,7 +10,7 @@ msavi(directory = getwd(), crop = "n", ext2crop = "none")
 \item{ext2crop, crop, directory}{Same as mentioned in \code{\link[ASIP]{arvi}}.}
 }
 \value{
-File named msavi_'date of satellite image acqisition'.tif in the input folder
+Computed MSAVI product
 }
 \description{
 Modified Soil Adjusted Vegetation Index (MSAVI) is a vegetation index.
@@ -31,7 +31,7 @@ library (rgdal)
 # User may define paths directly like "/home/ur_folder" or "C:/ur_folder"
 path <- system.file ("TM_sample", package = "ASIP")
 shapefil <- paste0 (path, "/test.shp")
-msavi (directory = path, crop = "y", ext2crop = shapefil)
+op <- msavi (directory = path, crop = "y", ext2crop = shapefil)
 }
 \references{
 \href{http://www.sciencedirect.com/science/article/pii/0034425794901341}{Qi J, Chehbouni A, Huete A R, Kerr Y, Sorooshian S (1994) A modified soil adjusted vegetation index. Remote Sensing of Environment, 48 (2), pp: 119-126. doi:10.1016/0034-4257(94)90134-1.}

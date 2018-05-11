@@ -4,11 +4,14 @@
 \alias{crop.bands}
 \title{Cropping of satellite image bands}
 \usage{
-crop.bands(directory = getwd(), crop = "n", ext2crop = "none", b1 = 1,
-  b2 = 1, b3 = 1, b4 = 1, b5 = 1, b6 = 1, b7 = 1)
+crop.bands(directory = getwd(), crop = "n", ext2crop = "none",
+  op_directory = directory, b1 = 1, b2 = 1, b3 = 1, b4 = 1, b5 = 1,
+  b6 = 1, b7 = 1)
 }
 \arguments{
 \item{ext2crop, crop, directory}{Same as mentioned in \code{\link[ASIP]{arvi}}.}
+
+\item{op_directory}{Specify the output directory (within double quotes). By default the input satellite image directory will be selected as the output directory.}
 
 \item{b1}{By default Band1 will be cropped. To cancel cropping of this band assign value 0.}
 

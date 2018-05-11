@@ -10,7 +10,7 @@ gemi(directory = getwd(), crop = "n", ext2crop = "none")
 \item{ext2crop, crop, directory}{Same as mentioned in \code{\link[ASIP]{arvi}}.}
 }
 \value{
-File named gemi_'date of satellite image acqisition'.tif in the input folder
+Computed GEMI product
 }
 \description{
 Global Environmental Monitoring Index (GEMI) is a vegetation based index designed to
@@ -31,7 +31,7 @@ library (rgdal)
 # User may define paths directly like "/home/ur_folder" or "C:/ur_folder"
 path <- system.file ("TM_sample", package = "ASIP")
 shapefil <- paste0 (path, "/test.shp")
-gemi (directory = path, crop = "y", ext2crop = shapefil)
+op <- gemi (directory = path, crop = "y", ext2crop = shapefil)
 }
 \references{
 \href{https://link.springer.com/article/10.1007/BF00031911}{Pinty, B. and M. M. Verstraete (1992) GEMI: a non-linear

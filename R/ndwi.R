@@ -2,7 +2,7 @@
 #'
 #' Normalized Difference Water Index (NDWI) is used to monitor changes related to water content in water bodies proposed by McFeeters (1996).
 #' @param ext2crop,crop,directory Same as mentioned in \code{\link[ASIP]{arvi}}.
-#' @return File named ndwi_'date of satellite image acqisition'.tif in the input folder
+#' @return Computed NDWI product
 #' @note 1. NDWI = (r_green - r_nir) / (r_nir + r_green)
 #'
 #' where, "r_" denotes TOA reflectance band.
@@ -26,7 +26,7 @@
 #' # User may define paths directly like "/home/ur_folder" or "C:/ur_folder"
 #' path <- system.file ("TM_sample", package = "ASIP")
 #' shapefil <- paste0 (path, "/test.shp")
-#' ndwi (directory = path, crop = "y", ext2crop = shapefil)
+#' op <- ndwi (directory = path, crop = "y", ext2crop = shapefil)
 # ndwi function
 ndwi <- function(directory = getwd(), crop = "n", ext2crop = "none")
 {
@@ -289,6 +289,7 @@ ndwi <- function(directory = getwd(), crop = "n", ext2crop = "none")
   }
   ######## Landsat TM ending ############
   ndwi <- (toa_green-toa_nir)/(toa_nir+toa_green)
-  writeRaster(ndwi,paste0(directory,"/","ndwi_",data_aq),format="GTiff", overwrite=TRUE)
-  print("Program completed, output is named as 'ndwi_[date of data acquisition].tif' in satellite image folder")
+  #writeRaster(ndwi,paste0(directory,"/","ndwi_",data_aq),format="GTiff", overwrite=TRUE)
+  return(ndwi)
+  cat ("\nProgram completed, output is produced as a variable named 'ndwi'")
 }

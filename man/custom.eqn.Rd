@@ -28,7 +28,7 @@ aero for Aerosol/coastal band (Only on Landsat OLI images)}
 \item{ext2crop, crop, directory}{Same as mentioned in \code{\link[ASIP]{arvi}}.}
 }
 \value{
-File named ur raster_'date of satellite image acqisition'.tif in the input folder
+Computed custom equation based product.
 }
 \description{
 If any product or index is not available in this package, you don't need to do it manually.
@@ -51,9 +51,9 @@ library (rgdal)
 # User may define paths directly like "/home/ur_folder" or "C:/ur_folder"
 path <- system.file ("TM_sample", package = "ASIP")
 # Input equation should be as text (inside double quotes)
-eqn <- "(2* (nir^2)+ (2.20 + green))/ (blue / (2 * pi))"
+eqn <- "(2 * red) + (nir/blue)"
 shapefil <- paste0 (path, "/test.shp")
-custom.eqn (directory = path, cus.formula = eqn, crop = "y", ext2crop = shapefil)
+op <- custom.eqn (directory = path, cus.formula = eqn, crop = "y", ext2crop = shapefil)
 }
 \references{
 \href{http://www.tandfonline.com/doi/ref/10.1080/01431169208904159}{Epema G F (1992) Atmospheric condition and its influence on reflectance

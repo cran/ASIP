@@ -3,6 +3,7 @@
 #' Normalized Difference Vegetation Index (NDVI). It is the most widely used satellite image derived index emphasizing on vegetation mapping.
 #' This function can also be used to obtain the ground emissivity as well.
 #' @param ext2crop,crop,directory Same as mentioned in \code{\link[ASIP]{arvi}}.
+#' @param op_directory Specify the output directory (within double quotes). By default the input satellite image directory will be selected as the output directory.
 #' @param emissivity Assign value "y" to get the emissivity of the surface as a seperate raster file.
 #' @return File named ndvi_'date of satellite image acqisition'.tif in the input folder
 #' @note 1. NDVI= (r_nir - r_red)/(r_nir + r_red)
@@ -30,7 +31,7 @@
 #' shapefil <- paste0 (path, "/test.shp")
 #' ndvi (directory = path, crop = "y", ext2crop = shapefil)
 # ndvi function
-ndvi <- function(directory = getwd(), crop = "n", ext2crop = "none", emissivity = "n")
+ndvi <- function(directory = getwd(), crop = "n", ext2crop = "none", op_directory = directory, emissivity = "n")
 {
   # If the directory is not set
   bands <- length(list.files(directory,pattern = "*TIF"))
@@ -72,6 +73,17 @@ ndvi <- function(directory = getwd(), crop = "n", ext2crop = "none", emissivity 
       shape <- ext2crop
     }
   }
+
+  # Defining folders properly
+  if (stringr::str_sub(op_directory) == "/")
+  {
+    op_directory <- stringr::str_sub(op_directory, start = 1L, end = -2L)
+  }
+  if (stringr::str_sub(directory) == "/")
+  {
+    directory <- stringr::str_sub(directory, start = 1L, end = -2L)
+  }
+
   meta_data <- readLines(paste0(directory,"/",sat_fold,"_MTL.txt"))
   count_i <- length(meta_data)
   if (count_i==0){print("ERROR: MTL file not found")}
@@ -292,15 +304,24 @@ ndvi <- function(directory = getwd(), crop = "n", ext2crop = "none", emissivity 
   }
   ######## Landsat TM ending ############
   ndvi <- (toa_nir-toa_red)/(toa_nir+toa_red)
-  writeRaster(ndvi,paste0(directory,"/","ndvi_",data_aq), format= "GTiff", overwrite= TRUE)
-
+  #writeRaster(ndvi,paste0(op_directory,"/","ndvi_",data_aq), format= "GTiff", overwrite= TRUE)
+  op_bands <- list()
+  op_bands [[1]] <- ndvi
   # Emissivity
+  op_names <- list()
+  op_names [[1]] <- "First variable ndvi band"
   if (emissivity != "n")
   {
     emis <- 1.0094 + (0.047 * log (ndvi))
-    writeRaster(emis,paste0(directory,"/","emissivity_",data_aq), format= "GTiff", overwrite= TRUE)
-    print ("Emissivity on pixels with negative NDVI values can't be computed. Thereby, those pixels will not have any values in the emissivity file")
+    op_bands [[2]] <- emis
+    op_names [[2]] <- "Second variable is emissivity band"
+    #writeRaster(emis,paste0(op_directory,"/","emissivity_",data_aq), format= "GTiff", overwrite= TRUE)
+    cat ("\nEmissivity on pixels with negative NDVI values can't be computed. Thereby, those pixels will not have any values in the emissivity product")
+    cat ("\nEmissivity is produced as a variable named 'emis'")
   }
-
-  print("Program completed, output is named as 'ndvi_[date of data acquisition].tif' in satellite image folder")
+  op <- list()
+  op [[2]] <- op_bands
+  op [[1]] <- op_names
+  return(op)
+  cat ("\nProgram completed, output is produced as 'ndvi'")
 }

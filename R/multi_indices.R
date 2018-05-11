@@ -3,6 +3,7 @@
 #' This function is designed to produce multiple indices directly. The source satellite image bands will be converted Top of Atmosphere (TOA)
 #' reflectance prior to do the indices production.
 #' @param ext2crop,crop,directory Same as mentioned in \code{\link[ASIP]{arvi}}.
+#' @param op_directory Specify the output directory <within double quotes>. By default the input satellite image directory will be selected as the output directory.
 #' @param arvi This product won't be produced by default. To produce this product, assign value 1.
 #' This product is same as that of the output from \code{\link[ASIP]{arvi}}. Only difference is, this function intakes
 #' already produced TOA bands instead of creating new TOA bands from source satellite image bands.
@@ -44,10 +45,10 @@
 #' # User may define paths directly like "/home/ur_folder" or "C:/ur_folder"
 #' path <- system.file ("TM_sample", package = "ASIP")
 #' shapefil <- paste0 (path, "/test.shp")
-#' dn2toa (path, crop = "f", ext2crop = shapefil, b3=0, b4=0, b5=0, b6 = 0, b7 = 0)
+#' multi.indices (path, crop = "f", ext2crop = shapefil, msavi =1, ndvi = 0)
 
 # TOA
-multi.indices <- function (directory = getwd(), crop = "n", ext2crop = "none", arvi=0, gamma=1, gemi=0, gvmi=0, msavi=0, ndbi=0, ndvi=1, ndwi=0, pavi=0, all=0)
+multi.indices <- function (directory = getwd(), crop = "n", ext2crop = "none", op_directory = directory, arvi=0, gamma=1, gemi=0, gvmi=0, msavi=0, ndbi=0, ndvi=1, ndwi=0, pavi=0, all=0)
 {
   # If the directory is not set
   if (all == 1)
@@ -57,7 +58,7 @@ multi.indices <- function (directory = getwd(), crop = "n", ext2crop = "none", a
   bands <- length (list.files(directory,pattern = "*TIF"))
   if (bands == 0)
     stop("Define your satellite image folder path properly")
-
+  b1 <-b2 <-b3<- b4<- b5 <- b7<- b6 <- 0
   # Finding out which satellite sensor data & name of satellite image data
   files <- list.files(directory)
   for (i in 1:length(files))
@@ -93,6 +94,16 @@ multi.indices <- function (directory = getwd(), crop = "n", ext2crop = "none", a
       ext <- raster::extent (ext2crop)
       shape <- ext2crop
     }
+  }
+
+  # Defining folders properly
+  if (stringr::str_sub(op_directory) == "/")
+  {
+    op_directory <- stringr::str_sub(op_directory, start = 1L, end = -2L)
+  }
+  if (stringr::str_sub(directory) == "/")
+  {
+    directory <- stringr::str_sub(directory, start = 1L, end = -2L)
   }
 
   meta_data <- readLines(paste0(directory,"/",sat_fold,"_MTL.txt"))
@@ -570,57 +581,78 @@ multi.indices <- function (directory = getwd(), crop = "n", ext2crop = "none", a
     }
   }
   ######## Landsat TM ending ############
-  if (arvi==1)
-  {
-    rb <- toa_red - gamma * (toa_blu - toa_red)
-    arvi <- (toa_nir - rb) / (toa_nir + rb)
-    writeRaster(arvi,paste0(directory,"/arvi"),format="GTiff", overwrite=TRUE)
-  }
+  op_names <- list()
+  op_bands <- list()
 
-  if (gemi==1)
-  {
-    gem_c1 <- (2* ((toa_nir^2) - (toa_red^2)) + (1.5 * toa_nir) + (0.5 * toa_red))/ (toa_nir+toa_red+0.5)
-    gemi= gem_c1 * (1- (0.25* gem_c1)) - ((toa_red-0.125)/(1-toa_red))
-    writeRaster(gemi,paste0(directory,"/gemi"),format="GTiff", overwrite=TRUE)
-  }
+  j <- 0
+  if (arvi == 1)
+   {
+     j <- j+1
+     op_names [[j]] = paste0("raster no.", j, " is arvi")
 
-  if (gvmi==1)
-  {
-    gvmi <- ((toa_nir+0.1)-(toa_swir2+0.02))/((toa_nir+0.1)+(toa_swir2+0.02))
-    writeRaster(gvmi,paste0(directory,"/gvmi"),format="GTiff", overwrite=TRUE)
-  }
+     rb <- toa_red - gamma * (toa_blu - toa_red)
+     arvi <- (toa_nir - rb) / (toa_nir + rb)
+     op_bands[[j]] = arvi
+   }
+  if (gemi == 1)
+    {
+      j <- j+1
+      gem_c1 <- (2* ((toa_nir^2) - (toa_red^2)) + (1.5 * toa_nir) + (0.5 * toa_red))/ (toa_nir+toa_red+0.5)
+      gemi <- gem_c1 * (1- (0.25* gem_c1)) - ((toa_red-0.125)/(1-toa_red))
+      op_names [[j]] = paste0("raster no.", j, " is gemi")
+      op_bands [[j]] = gemi
+    }
+  if (gvmi == 1)
+    {
+      j <- j+1
+      gvmi <- ((toa_nir+0.1)-(toa_swir2+0.02))/((toa_nir+0.1)+(toa_swir2+0.02))
+      op_names [[j]] = paste0("raster no.", j, " is gvmi")
+      op_bands [[j]] = gvmi
+    }
+  if (msavi == 1)
+    {
+      j <- j+1
+      msavi_c1 <- (2*toa_nir)+1
+      msavi_c2 <- ((2*toa_nir)+1)^2
+      msavi_c3 <- (msavi_c2 - (8 * (toa_nir-toa_red)))^0.5
+      msavi <- (msavi_c1 - msavi_c3)/2
+      op_names [[j]] = paste0("raster no.", j, " is msavi")
+      op_bands [[j]] = msavi
+      rm(msavi_c3, msavi_c2, msavi_c1)
+    }
 
-  if (msavi==1)
-  {
-    msavi_c1= (2*toa_nir)+1
-    msavi_c2= ((2*toa_nir)+1)^2
-    msavi_c3= (msavi_c2 - (8 * (toa_nir-toa_red)))^0.5
-    msavi=(msavi_c1 - msavi_c3)/2
-    writeRaster(msavi,paste0(directory,"/msavi"),format="GTiff", overwrite=TRUE)
-  }
-
-  if (ndbi==1)
-  {
-    ndbi <- (toa_swir1 - toa_nir)/(toa_swir1 + toa_nir)
-    writeRaster(ndbi,paste0(directory,"/ndbi"),format="GTiff", overwrite=TRUE)
-  }
-
-  if (ndvi==1)
-  {
-    ndvi <- (toa_nir-toa_red)/(toa_nir+toa_red)
-    writeRaster(ndvi,paste0(directory,"/ndvi"),format="GTiff", overwrite=TRUE)
-  }
-
-  if (ndwi==1)
-  {
-    ndwi <- (toa_green-toa_nir)/(toa_nir+toa_green)
-    writeRaster(ndwi,paste0(directory,"/ndwi"),format="GTiff", overwrite=TRUE)
-  }
-
-  if (pavi==1)
-  {
-    pavi= ((toa_nir^2)- (toa_red^2))/((toa_nir^2)+ (toa_red^2))
-    writeRaster(pavi,paste0(directory,"/pavi"),format="GTiff", overwrite=TRUE)
-  }
-  print("Program finished, results will be located in the satellite folder")
+  if (ndbi == 1)
+    {
+      j <- j+1
+      ndbi <- (toa_swir1 - toa_nir)/(toa_swir1 + toa_nir)
+      op_names [[j]] = paste0("raster no.", j, " is ndbi")
+      op_bands [[j]] = ndbi
+    }
+  if (ndvi == 1)
+    {
+      j <- j+1
+      ndvi <- (toa_nir-toa_red)/(toa_nir+toa_red)
+      op_names [[j]] = paste0("raster no.", j, " is ndvi")
+      op_bands [[j]] = ndvi
+    }
+  if (ndwi == 1)
+    {
+      j <- j+1
+      ndwi <- (toa_green-toa_nir)/(toa_nir+toa_green)
+      op_names [[j]] = paste0("raster no.", j, " is ndwi")
+      op_bands [[j]] = ndwi
+    }
+  if (pavi == 1)
+    {
+      j <- j+1
+      pavi <- ((toa_nir^2)- (toa_red^2))/((toa_nir^2)+ (toa_red^2))
+      op_names [[j]] = paste0("raster no.", j, " is pavi")
+      op_bands [[j]] = pavi
+    }
+  rm (arvi, gvmi, gemi, msavi, ndbi, ndvi, ndwi,pavi)
+  op <- list()
+  op [[1]] <- op_names
+  op [[2]] <- op_bands
+  return(op)
+  cat ("\nProgram finished, products are produced as vairables with specific names")
 }

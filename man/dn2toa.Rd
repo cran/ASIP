@@ -4,11 +4,14 @@
 \alias{dn2toa}
 \title{DN to TOA conversion of optical bands}
 \usage{
-dn2toa(directory = getwd(), crop = "n", ext2crop = "none", b1 = 1,
-  b2 = 1, b3 = 1, b4 = 1, b5 = 1, b6 = 1, b7 = 1)
+dn2toa(directory = getwd(), crop = "n", ext2crop = "none",
+  op_directory = directory, b1 = 1, b2 = 1, b3 = 1, b4 = 1, b5 = 1,
+  b6 = 1, b7 = 1)
 }
 \arguments{
 \item{ext2crop, crop, directory}{Same as mentioned in \code{\link[ASIP]{arvi}}.}
+
+\item{op_directory}{Specify the output directory (within double quotes). By default the input satellite image directory will be selected as the output directory.}
 
 \item{b1}{By default Band1 will be processed to TOA reflectance. To cancel production of this band assign value 0.}
 

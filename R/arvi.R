@@ -19,7 +19,7 @@
 #' @param ext2crop Path to the shapefile (*.shp) which will be used for cropping. Shapefile should have SAME CORDINATE SYSTEM as the satellite image.
 #' Either provide the full path of .shp file or provide the name of the shapefile variable which is already opened.
 #' @param gamma It is an aerosol dependant factor. For more details please refer Kaufman and Tanre (1992). By default the value is 1.
-#' @return File named "arvi_'date of satellite image acqisition'.tif" in the input folder.
+#' @return Computed ARVI product
 #' @note 1. ARVI = (r_nir - rb)/(r_nir + rb), where
 #'
 #' rb = r_red - gamma (r_blue - r_red)'  and "r_" denotes Top Of Atmoshpere (TOA) reflection, 'gamma' value is 1 by default as recommended if information about the aerosol type is not available.
@@ -38,7 +38,7 @@
 #' # User may define paths directly like "/home/ur_folder" or "C:/ur_folder"
 #' path <- system.file ("TM_sample", package = "ASIP")
 #' shapefil <- paste0 (path, "/test.shp")
-#' arvi (directory = path, crop = "y", ext2crop = shapefil)
+#' op <- arvi (directory = path, crop = "y", ext2crop = shapefil)
 arvi <- function (directory = getwd(), crop = "n", ext2crop = "none", gamma = 1)
 {
   # If the directory is not set
@@ -345,6 +345,7 @@ arvi <- function (directory = getwd(), crop = "n", ext2crop = "none", gamma = 1)
   ######## Landsat TM ending ############
   rb <- toa_red - gamma * (toa_blu - toa_red)
   arvi <- (toa_nir - rb) / (toa_nir + rb)
-  raster::writeRaster (arvi, paste0 (directory, "/", "arvi_", data_aq), format = "GTiff", overwrite = TRUE)
-  print ("Program completed, output is named as 'arvi_[date of data acquisition].tif' in satellite image folder")
+  return(arvi)
+  #raster::writeRaster (arvi, paste0 (directory, "/", "arvi_", data_aq), format = "GTiff", overwrite = TRUE)
+  cat ("\nProgram completed, output is produced as a variable named 'arvi'")
 }

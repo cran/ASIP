@@ -2,6 +2,7 @@
 #'
 #' Crop desired satellite image bands either using a shapefile or draw custom extent from a plot image while running the function.
 #' @param ext2crop,crop,directory Same as mentioned in \code{\link[ASIP]{arvi}}.
+#' @param op_directory Specify the output directory (within double quotes). By default the input satellite image directory will be selected as the output directory.
 #' @param b1 By default Band1 will be cropped. To cancel cropping of this band assign value 0.
 #' @param b2 By default Band2 will be cropped. To cancel cropping of this band assign value 0.
 #' @param b3 By default Band3 will be cropped. To cancel cropping of this band assign value 0.
@@ -25,7 +26,7 @@
 #' shapefil <- paste0 (path, "/test.shp")
 #' # Assign 0 values to band names which are not required
 #' crop.bands (path, crop = "f", ext2crop = shapefil, b3=0, b4=0, b5=0, b6 = 0, b7 = 0)
-crop.bands <- function (directory= getwd(), crop = "n", ext2crop = "none",b1=1,b2=1,b3=1,b4=1,b5=1,b6=1,b7=1)
+crop.bands <- function (directory= getwd(), crop = "n", ext2crop = "none", op_directory = directory, b1=1,b2=1,b3=1,b4=1,b5=1,b6=1,b7=1)
 {
   # If the directory is not set
   bands <- length (list.files(directory,pattern = "*TIF"))
@@ -68,6 +69,18 @@ crop.bands <- function (directory= getwd(), crop = "n", ext2crop = "none",b1=1,b
       shape <- ext2crop
     }
   }
+
+  if (stringr::str_sub(op_directory) == "/")
+  {
+    op_directory <- stringr::str_sub(op_directory, start = 1L, end = -2L)
+  }
+  if (stringr::str_sub(directory) == "/")
+  {
+    directory <- stringr::str_sub(directory, start = 1L, end = -2L)
+  }
+
+  op_bands <- list()
+  op_names <- list()
   ######### Landsat 8 starting###############
   if (satellite=="LC")
   {
@@ -83,57 +96,19 @@ crop.bands <- function (directory= getwd(), crop = "n", ext2crop = "none",b1=1,b
       ext <- drawExtent()
     }
     # Defining bands
-
-    if (b7==1)
+    j <- 0
+    if (b1==1)
     {
-      swir2 <- as.integer(raster(paste0(directory,"/",sat_fold,"_B7.TIF")))
-      swir2_crop <- crop(swir2, ext)
+      aero <- as.integer(raster(paste0(directory,"/",sat_fold,"_B1.TIF")))
+      aero_crop <- crop(aero, ext)
       if (crop=="f")
       {
-        swir2_crop <- mask(swir2_crop,shape)
+        aero_crop <- mask(aero_crop,shape)
       }
-      writeRaster(swir2_crop,paste0(directory,"/","swir2_crop"),format="GTiff",overwrite=TRUE)
-    }
-
-    if (b6==1)
-    {
-      swir1 <- as.integer(raster(paste0(directory,"/",sat_fold,"_B6.TIF")))
-      swir1_crop <- crop(swir1, ext)
-      if (crop=="f")
-      {
-        swir1_crop <- mask(swir1_crop,shape)
-      }
-      writeRaster(swir1_crop,paste0(directory,"/","swir1_crop"),format="GTiff",overwrite=TRUE)
-    }
-
-    if (b5==1)
-    {
-      nir_crop <- crop(nir, ext)
-      if (crop=="f")
-      {
-        nir_crop <- mask(nir_crop,shape)
-      }
-      writeRaster(nir_crop,paste0(directory,"/","nir_crop"),format="GTiff",overwrite=TRUE)
-    }
-
-    if (b4==1)
-    {
-      red_crop <- crop(red, ext)
-      if (crop=="f")
-      {
-        red_crop <- mask(red_crop,shape)
-      }
-      writeRaster(red_crop,paste0(directory,"/","red_crop"),format="GTiff",overwrite=TRUE)
-    }
-
-    if (b3==1)
-    {
-      green_crop <- crop(green, ext)
-      if (crop=="f")
-      {
-        green_crop <- mask(green_crop,shape)
-      }
-      writeRaster(green_crop,paste0(directory,"/","green_crop"),format="GTiff",overwrite=TRUE)
+      j <- j+1
+      op_bands [[j]] <- aero_crop
+      op_names [[j]] <- paste0("Raster no.", j, " is Ultra Blue (coastal/aerosol) band")
+      #writeRaster(aero_crop,paste0(op_directory,"/","aero_crop"),format="GTiff",overwrite=TRUE)
     }
 
     if (b2==1)
@@ -144,19 +119,80 @@ crop.bands <- function (directory= getwd(), crop = "n", ext2crop = "none",b1=1,b
       {
         blu_crop <- mask(blu_crop,shape)
       }
-      writeRaster(blu_crop,paste0(directory,"/","blu_crop"),format="GTiff",overwrite=TRUE)
+      j <- j+1
+      op_bands [[j]] <- blu_crop
+      op_names [[j]] <- paste0("Raster no.", j, " is Blue band")
+      #writeRaster(blu_crop,paste0(op_directory,"/","blu_crop"),format="GTiff",overwrite=TRUE)
     }
 
-    if (b1==1)
+    if (b3==1)
     {
-      aero <- as.integer(raster(paste0(directory,"/",sat_fold,"_B1.TIF")))
-      aero_crop <- crop(aero, ext)
+      green_crop <- crop(green, ext)
       if (crop=="f")
       {
-        aero_crop <- mask(aero_crop,shape)
+        green_crop <- mask(green_crop,shape)
       }
-      writeRaster(aero_crop,paste0(directory,"/","aero_crop"),format="GTiff",overwrite=TRUE)
+      j <- j+1
+      op_bands [[j]] <- green_crop
+      op_names [[j]] <- paste0("Raster no.", j, " is Green band")
+      #writeRaster(green_crop,paste0(op_directory,"/","green_crop"),format="GTiff",overwrite=TRUE)
     }
+
+    if (b4==1)
+    {
+      red_crop <- crop(red, ext)
+      if (crop=="f")
+      {
+        red_crop <- mask(red_crop,shape)
+      }
+      j <- j+1
+      op_bands [[j]] <- red_crop
+      op_names [[j]] <- paste0("Raster no.", j, " is Red band")
+      #writeRaster(red_crop,paste0(op_directory,"/","red_crop"),format="GTiff",overwrite=TRUE)
+    }
+
+    if (b5==1)
+    {
+      nir_crop <- crop(nir, ext)
+      if (crop=="f")
+      {
+        nir_crop <- mask(nir_crop,shape)
+      }
+
+      j <- j+1
+      op_bands [[j]] <- nir_crop
+      op_names [[j]] <- paste0("Raster no.", j, " is NIR band")
+      #writeRaster(nir_crop,paste0(op_directory,"/","nir_crop"),format="GTiff",overwrite=TRUE)
+    }
+
+    if (b6==1)
+    {
+      swir1 <- as.integer(raster(paste0(directory,"/",sat_fold,"_B6.TIF")))
+      swir1_crop <- crop(swir1, ext)
+      if (crop=="f")
+      {
+        swir1_crop <- mask(swir1_crop,shape)
+      }
+      j <- j+1
+      op_bands [[j]] <- swir1_crop
+      op_names [[j]] <- paste0("Raster no.", j, " is SWIR-1 band")
+      #writeRaster(swir1_crop,paste0(op_directory,"/","swir1_crop"),format="GTiff",overwrite=TRUE)
+    }
+
+    if (b7==1)
+    {
+      swir2 <- as.integer(raster(paste0(directory,"/",sat_fold,"_B7.TIF")))
+      swir2_crop <- crop(swir2, ext)
+      if (crop=="f")
+      {
+        swir2_crop <- mask(swir2_crop,shape)
+      }
+      j <- j+1
+      op_bands [[j]] <- swir2_crop
+      op_names [[j]] <- paste0("Raster no.", j, " is SWIR-2 band")
+      #writeRaster(swir2_crop,paste0(op_directory,"/","swir2_crop"),format="GTiff",overwrite=TRUE)
+    }
+    rm (j)
   }
   ########### Landsat-8 ending ##############
   ########### Landsat-ETM+ and TM starting ##############
@@ -173,7 +209,7 @@ crop.bands <- function (directory= getwd(), crop = "n", ext2crop = "none",b1=1,b
       print("You can click on the top left of custom subset region followed by the bottom right")
       ext <- drawExtent()
     }
-
+    j <- 0
     if (b1==1)
     {
       blu <- raster(paste0(directory,"/",sat_fold,"_B1.TIF"))
@@ -182,7 +218,10 @@ crop.bands <- function (directory= getwd(), crop = "n", ext2crop = "none",b1=1,b
       {
         blu_crop <- mask(blu_crop,shape)
       }
-      writeRaster(blu_crop,paste0(directory,"/","blu_crop"), format= "GTiff", overwrite=TRUE)
+      j <- j+1
+      op_bands [[j]] <- blu_crop
+      op_names [[j]] <- paste0("Raster no.", j, " is Blue band")
+      #writeRaster(blu_crop,paste0(op_directory,"/","blu_crop"), format= "GTiff", overwrite=TRUE)
     }
 
     if (b2==1)
@@ -192,7 +231,10 @@ crop.bands <- function (directory= getwd(), crop = "n", ext2crop = "none",b1=1,b
       {
         green_crop <- mask(green_crop,shape)
       }
-      writeRaster(green_crop,paste0(directory,"/","green_crop"),format="GTiff",overwrite=TRUE)
+      j <- j+1
+      op_bands [[j]] <- green_crop
+      op_names [[j]] <- paste0("Raster no.", j, " is Green band")
+      #writeRaster(green_crop,paste0(op_directory,"/","green_crop"),format="GTiff",overwrite=TRUE)
     }
 
     if (b3==1)
@@ -202,7 +244,10 @@ crop.bands <- function (directory= getwd(), crop = "n", ext2crop = "none",b1=1,b
       {
         red_crop <- mask(red_crop,shape)
       }
-      writeRaster (red_crop,paste0(directory,"/","red_crop"),format="GTiff",overwrite=TRUE)
+      j <- j+1
+      op_bands [[j]] <- red_crop
+      op_names [[j]] <- paste0("Raster no.", j, " is Red band")
+      #writeRaster (red_crop,paste0(op_directory,"/","red_crop"),format="GTiff",overwrite=TRUE)
     }
 
     if (b4==1)
@@ -212,7 +257,10 @@ crop.bands <- function (directory= getwd(), crop = "n", ext2crop = "none",b1=1,b
       {
         nir_crop <- mask(nir_crop,shape)
       }
-      writeRaster(nir_crop,paste0(directory,"/","nir_crop"),format="GTiff",overwrite=TRUE)
+      j <- j+1
+      op_bands [[j]] <- nir_crop
+      op_names [[j]] <- paste0("Raster no.", j, " is NIR band")
+      #writeRaster(nir_crop,paste0(op_directory,"/","nir_crop"),format="GTiff",overwrite=TRUE)
     }
 
     if (b5==1)
@@ -223,7 +271,10 @@ crop.bands <- function (directory= getwd(), crop = "n", ext2crop = "none",b1=1,b
       {
         swir1_crop <- mask(swir1_crop,shape)
       }
-      writeRaster(swir1_crop,paste0(directory,"/","swir1_crop"),format="GTiff",overwrite=TRUE)
+      j <- j+1
+      op_bands [[j]] <- swir1_crop
+      op_names [[j]] <- paste0("Raster no.", j, " is SWIR-1 band")
+      #writeRaster(swir1_crop,paste0(op_directory,"/","swir1_crop"),format="GTiff",overwrite=TRUE)
     }
 
     if (b7==1)
@@ -234,8 +285,17 @@ crop.bands <- function (directory= getwd(), crop = "n", ext2crop = "none",b1=1,b
       {
         swir2_crop <- mask(swir2_crop,shape)
       }
-      writeRaster(swir2_crop,paste0(directory,"/","swir2_crop"),format="GTiff",overwrite=TRUE)
+      j <- j+1
+      op_bands [[j]] <- swir2_crop
+      op_names [[j]] <- paste0("Raster no.", j, " is SWIR-2 band")
+      #writeRaster(swir2_crop,paste0(op_directory,"/","swir2_crop"),format="GTiff",overwrite=TRUE)
     }
+  rm (j)
   }
+  op <- list()
+  op [[1]] <- op_names
+  op [[2]] <- op_bands
+  return (op)
+  cat ("\nProgram completed, cropped bands are coverted to new variables with respective names")
 }
   ############## Landsat ETM & TM ending ##################

@@ -1,16 +1,16 @@
 Package: ASIP
 Type: Package
-Date: 2017-09-15
+Date: 2018-05-11
 Title: Automated Satellite Image Processing
-Version: 0.3.2
+Version: 0.4.9
 Author: M J Riyas [aut, cre],
   T H Syed [aut]
 Maintainer: M J Riyas <riyasmjgeo@gmail.com>
 Description: Efficiently perform complex satellite image processes automatically with minimum inputs. 
-  Functions facilitate more controls on the user to specify how the function needs to be executed by offering more customization options and provide more functionalities.
+  Functions are providing more control on the user to specify how the function needs to be executed by offering more customization options and facilitate more functionalities. 
   The functions are designed to identify the type of input satellite images and perform accordingly. 
   Also, some functions are giving options to perform multiple satellite data (even from different types) in single run.
-  Package currently supports satellite images from most widely used Landsat 4,5,7 and 8 and ASTER L1T data. 
+  Package currently supports satellite images from most widely used Landsat 4,5,7 and 8 and Sentinel-2 MSI data. 
   The primary applications of this package are given below.
   1. Conversion of optical bands to top of atmosphere reflectance.
   2. Conversion of thermal bands to corresponding temperature images. 
@@ -23,12 +23,12 @@ Description: Efficiently perform complex satellite image processes automatically
   iii. Abrams (2000) <doi:10.1080/014311600210326>.
 License: GPL-3
 Encoding: UTF-8
-Depends: R (>= 3.4.1)
-Imports: raster (>= 2.5-8), utils, gdalUtils (>= 2.0.1.7), rgdal (>=
-        1.2-8)
+Depends: R (>= 3.4.0)
+Imports: raster (>= 2.6-7), utils, rgdal (>= 1.2-16), stringr (>=
+        1.2.0)
 LazyData: true
 RoxygenNote: 6.0.1
 NeedsCompilation: no
-Packaged: 2017-09-15 09:17:53 UTC; riyas
+Packaged: 2018-05-11 14:27:09 UTC; riyas
 Repository: CRAN
-Date/Publication: 2017-09-15 09:31:37 UTC
+Date/Publication: 2018-05-11 14:56:27 UTC

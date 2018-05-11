@@ -2,6 +2,7 @@
 #'
 #' Identifies Thermal Infra-Red (TIR) bands and converts them to  at satellite brightness temperature images.
 #' @param ext2crop,crop,directory Same as mentioned in \code{\link[ASIP]{arvi}}.
+#' @param op_directory Specify the output directory (within double quotes). By default the input satellite image directory will be selected as the output directory.
 #' @param unit By default the temperature image will be produced in Degree Kelvin. To produce the thermal image in Degree celcius, assign vale "c".
 #' To produce the thermal image in Degree celcius, assign vale "c".
 #' @return At Satellite Brightness Temperature images in .tif format in input directory.
@@ -22,7 +23,7 @@
 #' shapefil <- paste0 (path, "/test.shp")
 #' thermal (directory = path, crop = "y", ext2crop = shapefil, unit = "c")
 # DN to thermal
-thermal <- function(directory = getwd(), crop = "n", ext2crop = "none",unit = "Deg Kel")
+thermal <- function(directory = getwd(), crop = "n", ext2crop = "none", op_directory = directory, unit = "Deg Kel")
 {
   # If the directory is not set
   bands <- length(list.files(directory,pattern = "*TIF"))
@@ -64,10 +65,22 @@ thermal <- function(directory = getwd(), crop = "n", ext2crop = "none",unit = "D
       shape <- ext2crop
     }
   }
+  # Defining folders properly
+  if (stringr::str_sub(op_directory) == "/")
+  {
+    op_directory <- stringr::str_sub(op_directory, start = 1L, end = -2L)
+  }
+  if (stringr::str_sub(directory) == "/")
+  {
+    directory <- stringr::str_sub(directory, start = 1L, end = -2L)
+  }
 
   meta_data <- readLines(paste0(directory,"/",sat_fold,"_MTL.txt"))
   count_i <- length(meta_data)
   if (count_i==0){print("ERROR: MTL file not found")}
+  op_name <- list()
+  op_bands <- list()
+  j <-0
   ######### Landsat 8 starting###############
   if (satellite=="LC")
   {
@@ -104,7 +117,26 @@ thermal <- function(directory = getwd(), crop = "n", ext2crop = "none",unit = "D
         if (words[j]=="SUN_ELEVATION"){ sun_ele <- as.double(words[j+2])}
       }
     }
-    # Defining bands & toa calculation
+  # Defining bands & toa calculation
+
+    tir1 <- as.integer(raster(paste0(directory,"/",sat_fold,"_B10.TIF")))
+    if (crop == "y" || crop == "f" || crop == "u")
+    {
+      tir1 <- crop(tir1, ext)
+      if (crop=="f")
+      {
+        tir1 <- mask(tir1,shape)
+      }
+    }
+    rad_tir1 <- (tir1 * tir1_rad_mult) + tir1_rad_add
+    temp_tir1 <- tir1_k2/ log((tir1_k1/rad_tir1)+1)
+    if (unit=="c")
+    {temp_tir1 <- temp_tir1-273.15}
+    op_name [[1]] <- "First raster is TIR band 1"
+    op_bands [[1]] <- temp_tir1
+
+
+
    tir2 <- as.integer(raster(paste0(directory,"/",sat_fold,"_B11.TIF")))
    if (crop == "y" || crop == "f" || crop == "u")
       {
@@ -118,22 +150,12 @@ thermal <- function(directory = getwd(), crop = "n", ext2crop = "none",unit = "D
    temp_tir2 <- tir2_k2/ log((tir2_k1/rad_tir2)+1)
    if (unit=="c")
    {temp_tir2 <- temp_tir2-273.15}
-   writeRaster(temp_tir2,paste0(directory,"/","temp_tir2"),format="GTiff",overwrite=TRUE)
+   op_name [[2]] <- "Second raster is TIR band 2"
+   op_bands [[2]] <- temp_tir2
+   #writeRaster(tir2,paste0(op_directory,"/","temp_tir2"),format="GTiff",overwrite=TRUE)
 
-   tir1 <- as.integer(raster(paste0(directory,"/",sat_fold,"_B10.TIF")))
-   if (crop == "y" || crop == "f" || crop == "u")
-      {
-        tir1 <- crop(tir1, ext)
-        if (crop=="f")
-        {
-          tir1 <- mask(tir1,shape)
-        }
-      }
-   rad_tir1 <- (tir1 * tir1_rad_mult) + tir1_rad_add
-   temp_tir1 <- tir1_k2/ log((tir1_k1/rad_tir1)+1)
-   if (unit=="c")
-   {temp_tir1 <- temp_tir1-273.15}
-   writeRaster(temp_tir1,paste0(directory,"/","temp_tir1"),format="GTiff",overwrite=TRUE)
+
+   #writeRaster(tir1,paste0(op_directory,"/","temp_tir1"),format="GTiff",overwrite=TRUE)
   }
   ########### Landsat-8 ending ##############
   ########### Landsat-7 starting ##############
@@ -208,7 +230,10 @@ thermal <- function(directory = getwd(), crop = "n", ext2crop = "none",unit = "D
     tir1 <- tir1_k2/(log((tir1_k1/rad_b61)+1))
     if (unit=="c")
     {tir1 <- tir1-273.15}
-    writeRaster(tir1,paste0(directory,"/","tir1"),format="GTiff",overwrite=TRUE)
+    op_name [[1]] <- "First raster is TIR band 1"
+    op_bands [[1]] <- tir1
+
+    #writeRaster(tir1,paste0(op_directory,"/","tir1"),format="GTiff",overwrite=TRUE)
 
     tir2 <- raster(paste0(directory,"/",sat_fold,"_B6_VCID_2.TIF"))
     if (crop == "y" || crop == "f" || crop == "u")
@@ -223,7 +248,9 @@ thermal <- function(directory = getwd(), crop = "n", ext2crop = "none",unit = "D
     tir2 <- tir2_k2/(log((tir2_k1/rad_b62)+1))
     if (unit=="c")
     {tir2 <- tir2-273.15}
-    writeRaster(tir2,paste0(directory,"/","tir2"),format="GTiff",overwrite=TRUE)
+    op_name [[2]] <- "Second raster is TIR band 2"
+    op_bands [[2]] <- tir2
+    #writeRaster(tir2,paste0(op_directory,"/","tir2"),format="GTiff",overwrite=TRUE)
   }
   ############## Landsat ETM ending ##################
   ############## Landsat TM starting ##################
@@ -291,8 +318,14 @@ thermal <- function(directory = getwd(), crop = "n", ext2crop = "none",unit = "D
     tir <- k2/(log((k1/rad_b6)+1))
     if (unit=="c")
     {tir <- tir-273.15}
-    writeRaster(tir,paste0(directory,"/","tir"),format="GTiff",overwrite=TRUE)
+    op_name [[1]] <- "Thermal band"
+    op_bands [[1]] <- tir
+    #writeRaster(tir_tm,paste0(op_directory,"/","tir"),format="GTiff",overwrite=TRUE)
   }
-  print("Program finished, results will be located in the satellite folder")
+  op <- list()
+  op [[1]] <- op_name
+  op [[2]] <- op_bands
+  return(op)
+  cat ("\nProgram finished, results are produced as variables named 'tir[number]'")
   }
   ######## Landsat TM ending ############

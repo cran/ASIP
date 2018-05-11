@@ -10,7 +10,7 @@ pavi(directory = getwd(), crop = "n", ext2crop = "none")
 \item{ext2crop, crop, directory}{Same as mentioned in \code{\link[ASIP]{arvi}}.}
 }
 \value{
-File named pavi_'date of satellite image acqisition'.tif in the input folder.
+Computed PAVI product
 }
 \description{
 Purified Adjusted Vegetation Index (PAVI) is a vegetation based index.
@@ -29,5 +29,5 @@ library (rgdal)
 # User may define paths directly like "/home/ur_folder" or "C:/ur_folder"
 path <- system.file ("TM_sample", package = "ASIP")
 shapefil <- paste0 (path, "/test.shp")
-pavi (directory = path, crop = "y", ext2crop = shapefil)
+op <- pavi (directory = path, crop = "y", ext2crop = shapefil)
 }

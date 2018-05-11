@@ -8,7 +8,7 @@
 #'
 #' Other important notes are mentioned in \code{\link[ASIP]{custom.eqn}}.
 #' @export
-#' @return File named pavi_'date of satellite image acqisition'.tif in the input folder.
+#' @return Computed PAVI product
 #' @importFrom raster raster writeRaster extent mask crop stack
 #' @importFrom utils tail
 #' @examples
@@ -18,7 +18,7 @@
 #' # User may define paths directly like "/home/ur_folder" or "C:/ur_folder"
 #' path <- system.file ("TM_sample", package = "ASIP")
 #' shapefil <- paste0 (path, "/test.shp")
-#' pavi (directory = path, crop = "y", ext2crop = shapefil)
+#' op <- pavi (directory = path, crop = "y", ext2crop = shapefil)
 # PAVI (Purified Adjusted Vegetation Index) from DN bands
 pavi <- function(directory = getwd(), crop = "n", ext2crop = "none")
 {
@@ -76,8 +76,8 @@ pavi <- function(directory = getwd(), crop = "n", ext2crop = "none")
       b3 <- raster (paste0 (directory, "/", sat_fold, "_B3.TIF"))
       stak <- raster::stack(c(b5,b4,b3))
       plotRGB(stak, scale = 65536)
-      print("Please define your extent from the map in plot preview for further processing")
-      print("You can click on the top left of custom subset region followed by the bottom right")
+      cat("\nPlease define your extent from the map in plot preview for further processing")
+      cat("\nYou can click on the top left of custom subset region followed by the bottom right")
       ext <- drawExtent()
     }
     # Extracting values from meta data
@@ -281,7 +281,8 @@ pavi <- function(directory = getwd(), crop = "n", ext2crop = "none")
     toa_nir <- pi * rad_b4 * d^2  / esun4 * sin(sun_ele*(pi/180))
   }
   ######## Landsat TM ending ############
-  pavi= ((toa_nir^2)- (toa_red^2))/((toa_nir^2)+ (toa_red^2))
-  writeRaster(pavi,paste0(directory,"/","pavi_",data_aq),format="GTiff", overwrite=TRUE)
-  print("Program completed, output is named as 'pavi_[date of data acquisition].tif' in satellite image folder")
+  pavi <- ((toa_nir^2)- (toa_red^2))/((toa_nir^2)+ (toa_red^2))
+  #writeRaster(pavi,paste0(directory,"/","pavi_",data_aq),format="GTiff", overwrite=TRUE)
+  return(pavi)
+  cat ("\nProgram completed, output is produced as a variable named 'pavi'")
 }

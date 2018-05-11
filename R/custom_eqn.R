@@ -20,7 +20,7 @@
 #' swir2 for SWIR-2 (Short Wave Infra-red -2)
 #'
 #' aero for Aerosol/coastal band (Only on Landsat OLI images)
-#' @return File named ur raster_'date of satellite image acqisition'.tif in the input folder
+#' @return Computed custom equation based product.
 #' @note 1. FILENAMES OF ANY BAND FILES (*.TIF files) SHOULDN'T CHANGED.
 #'
 #' 2. Windows users should be careful while assigning directory. Use "/" to seperate folders not "\\".
@@ -40,9 +40,9 @@
 #' # User may define paths directly like "/home/ur_folder" or "C:/ur_folder"
 #' path <- system.file ("TM_sample", package = "ASIP")
 #' # Input equation should be as text (inside double quotes)
-#' eqn <- "(2* (nir^2)+ (2.20 + green))/ (blue / (2 * pi))"
+#' eqn <- "(2 * red) + (nir/blue)"
 #' shapefil <- paste0 (path, "/test.shp")
-#' custom.eqn (directory = path, cus.formula = eqn, crop = "y", ext2crop = shapefil)
+#' op <- custom.eqn (directory = path, cus.formula = eqn, crop = "y", ext2crop = shapefil)
 custom.eqn <- function (directory=getwd(), cus.formula = "none", crop = "n", ext2crop = "none" )
 {
   # If the directory is not set
@@ -482,7 +482,8 @@ custom.eqn <- function (directory=getwd(), cus.formula = "none", crop = "n", ext
     swir2 <- pi * rad_b7 * d^2  / esun7 * sin(sun_ele*(pi/180))
   }
   ######## Landsat TM ending ############
-  op <- eval(parse(text = cus.formula))
-  raster::writeRaster(op,paste0(directory,"/","ur raster_",data_aq),format="GTiff", overwrite=TRUE)
-  print("Program completed, output is named as 'ur raster_[date of data acquisition].tif' in satellite image folder")
+  cus_eqn <- eval(parse(text = cus.formula))
+  #raster::writeRaster(cus_eqn,paste0(directory,"/","output_",data_aq),format="GTiff", overwrite=TRUE)
+  return(cus_eqn)
+  cat ("\nProgram completed, output is produced as a variable named 'cus_eqn'")
 }

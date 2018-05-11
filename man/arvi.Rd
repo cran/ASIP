@@ -28,7 +28,7 @@ Either provide the full path of .shp file or provide the name of the shapefile v
 \item{gamma}{It is an aerosol dependant factor. For more details please refer Kaufman and Tanre (1992). By default the value is 1.}
 }
 \value{
-File named "arvi_'date of satellite image acqisition'.tif" in the input folder.
+Computed ARVI product
 }
 \description{
 Atmospherically Resistant Vegetation Index (ARVI) is a vegetation based index which
@@ -49,7 +49,7 @@ library (rgdal)
 # User may define paths directly like "/home/ur_folder" or "C:/ur_folder"
 path <- system.file ("TM_sample", package = "ASIP")
 shapefil <- paste0 (path, "/test.shp")
-arvi (directory = path, crop = "y", ext2crop = shapefil)
+op <- arvi (directory = path, crop = "y", ext2crop = shapefil)
 }
 \references{
 \href{http://ieeexplore.ieee.org/document/134076/?arnumber=134076&tag=1}{Kaufman, Y. J. and D. Tanre (1992) Atmospherically resistant vegetation index (ARVI) for EOS-MODIS, IEEE Transactions on Geoscience and Remote Sensing, 30 (2). doi:10.1109/36.134076.}

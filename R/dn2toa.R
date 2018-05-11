@@ -2,6 +2,7 @@
 #'
 #' Digital number (DN) bands to Top of Atmosphere (TOA) conversion.
 #' @param ext2crop,crop,directory Same as mentioned in \code{\link[ASIP]{arvi}}.
+#' @param op_directory Specify the output directory (within double quotes). By default the input satellite image directory will be selected as the output directory.
 #' @param b1 By default Band1 will be processed to TOA reflectance. To cancel production of this band assign value 0.
 #' @param b2 By default Band2 will be processed to TOA reflectance. To cancel production of this band assign value 0.
 #' @param b3 By default Band3 will be processed to TOA reflectance. To cancel production of this band assign value 0.
@@ -31,7 +32,7 @@
 #' dn2toa (path, crop = "f", ext2crop = shapefil, b3=0, b4=0, b5=0, b6 = 0, b7 = 0)
 
 # TOA
-dn2toa <- function (directory= getwd(), crop = "n", ext2crop = "none",b1=1,b2=1,b3=1,b4=1,b5=1,b6=1,b7=1)
+dn2toa <- function (directory= getwd(), crop = "n", ext2crop = "none", op_directory = directory, b1=1,b2=1,b3=1,b4=1,b5=1,b6=1,b7=1)
 {
   # If the directory is not set
   bands <- length (list.files(directory,pattern = "*TIF"))
@@ -75,12 +76,25 @@ dn2toa <- function (directory= getwd(), crop = "n", ext2crop = "none",b1=1,b2=1,
     }
   }
 
+  # Defining folders properly
+  if (stringr::str_sub(op_directory) == "/")
+  {
+    op_directory <- stringr::str_sub(op_directory, start = 1L, end = -2L)
+  }
+  if (stringr::str_sub(directory) == "/")
+  {
+    directory <- stringr::str_sub(directory, start = 1L, end = -2L)
+  }
+
+  op_bands <- list()
+  op_names <- list()
   meta_data <- readLines(paste0(directory,"/",sat_fold,"_MTL.txt"))
   count_i <- length(meta_data)
   if (count_i==0){print("ERROR: MTL file not found")}
   ######### Landsat 8 starting###############
   if (satellite=="LC")
   {
+    j <- 0
     if (crop == "u")
     {
       b5 <- raster (paste0 (directory, "/", sat_fold, "_B5.TIF"))
@@ -121,47 +135,58 @@ dn2toa <- function (directory= getwd(), crop = "n", ext2crop = "none",b1=1,b2=1,
     }
     # Defining bands & toa calculation
 
-    if (b7==1)
+    if (b1==1)
     {
-      swir2 <- as.integer(raster(paste0(directory,"/",sat_fold,"_B7.TIF")))
+      aero <- as.integer(raster(paste0(directory,"/",sat_fold,"_B1.TIF")))
       if (crop == "y" || crop == "f" || crop == "u")
       {
-        swir2 <- crop(swir2, ext)
+        aero <- crop(aero, ext)
         if (crop=="f")
         {
-          swir2 <- mask(swir2,shape)
+          aero <- mask(aero,shape)
         }
       }
-      toa_swir2 <- ((swir2 * swir2_refl_mult) + swir2_refl_add)/sin(sun_ele*(pi/180))
-      writeRaster(toa_swir2,paste0(directory,"/","toa_swir2"),format="GTiff",overwrite=TRUE)
+      toa_aero <- ((aero * aero_refl_mult) + aero_refl_add)/sin(sun_ele*(pi/180))
+      j <- j+1
+      op_bands [[j]] <- toa_aero
+      op_names [[j]] <- paste0("Raster no.", j, " is Ultra Blue (coastal/aerosol) band")
+      #writeRaster(toa_aero,paste0(op_directory,"/","toa_aero"),format="GTiff",overwrite=TRUE)
     }
-    if (b6==1)
+
+    if (b2==1)
     {
-      swir1 <- as.integer(raster(paste0(directory,"/",sat_fold,"_B6.TIF")))
+      blu <- as.integer(raster(paste0(directory,"/",sat_fold,"_B2.TIF")))
       if (crop == "y" || crop == "f" || crop == "u")
       {
-        swir1 <- crop(swir1, ext)
+        blu <- crop(blu, ext)
         if (crop=="f")
         {
-          swir1 <- mask(swir1,shape)
+          blu <- mask(blu,shape)
         }
       }
-      toa_swir1 <- ((swir1 * swir1_refl_mult) + swir1_refl_add)/sin(sun_ele*(pi/180))
-      writeRaster(toa_swir1,paste0(directory,"/","toa_swir1"),format="GTiff",overwrite=TRUE)
+      toa_blu <- ((blu * blu_refl_mult) + blu_refl_add)/sin(sun_ele*(pi/180))
+      j <- j+1
+      op_bands [[j]] <- toa_blu
+      op_names [[j]] <- paste0("Raster no.", j, " is Blue band")
+      #writeRaster(toa_blu,paste0(op_directory,"/","toa_blu"),format="GTiff",overwrite=TRUE)
     }
-    if (b5==1)
+
+    if (b3==1)
     {
-      nir <- as.integer(raster(paste0(directory,"/",sat_fold,"_B5.TIF")))
+      green <- as.integer(raster(paste0(directory,"/",sat_fold,"_B3.TIF")))
       if (crop == "y" || crop == "f" || crop == "u")
       {
-        nir <- crop(nir, ext)
+        green <- crop(green, ext)
         if (crop=="f")
         {
-          nir <- mask(nir,shape)
+          green <- mask(green,shape)
         }
       }
-      toa_nir <- ((nir * nir_refl_mult) + nir_refl_add)/sin(sun_ele*(pi/180))
-      writeRaster(toa_nir,paste0(directory,"/","toa_nir"),format="GTiff",overwrite=TRUE)
+      toa_green <- ((green * green_refl_mult) + green_refl_add)/sin(sun_ele*(pi/180))
+      j <- j+1
+      op_bands [[j]] <- toa_green
+      op_names [[j]] <- paste0("Raster no.", j, " is Green band")
+      #writeRaster(toa_green,paste0(op_directory,"/","toa_green"),format="GTiff",overwrite=TRUE)
     }
     if (b4==1)
     {
@@ -175,55 +200,71 @@ dn2toa <- function (directory= getwd(), crop = "n", ext2crop = "none",b1=1,b2=1,
         }
       }
       toa_red <- ((red * red_refl_mult) + red_refl_add)/sin(sun_ele*(pi/180))
-      writeRaster(toa_red,paste0(directory,"/","toa_red"),format="GTiff",overwrite=TRUE)
+      j <- j+1
+      op_bands [[j]] <- toa_red
+      op_names [[j]] <- paste0("Raster no.", j, " is Red band")
+      #      writeRaster(toa_red,paste0(op_directory,"/","toa_red"),format="GTiff",overwrite=TRUE)
     }
-    if (b3==1)
+    if (b5==1)
     {
-      green <- as.integer(raster(paste0(directory,"/",sat_fold,"_B3.TIF")))
+      nir <- as.integer(raster(paste0(directory,"/",sat_fold,"_B5.TIF")))
       if (crop == "y" || crop == "f" || crop == "u")
       {
-        green <- crop(green, ext)
+        nir <- crop(nir, ext)
         if (crop=="f")
         {
-          green <- mask(green,shape)
+          nir <- mask(nir,shape)
         }
       }
-      toa_green <- ((green * green_refl_mult) + green_refl_add)/sin(sun_ele*(pi/180))
-      writeRaster(toa_green,paste0(directory,"/","toa_green"),format="GTiff",overwrite=TRUE)
+      toa_nir <- ((nir * nir_refl_mult) + nir_refl_add)/sin(sun_ele*(pi/180))
+      j <- j+1
+      op_bands [[j]] <- toa_nir
+      op_names [[j]] <- paste0("Raster no.", j, " is NIR band")
+      #writeRaster(toa_nir,paste0(op_directory,"/","toa_nir"),format="GTiff",overwrite=TRUE)
     }
-    if (b2==1)
+
+    if (b6==1)
     {
-      blu <- as.integer(raster(paste0(directory,"/",sat_fold,"_B2.TIF")))
+      swir1 <- as.integer(raster(paste0(directory,"/",sat_fold,"_B6.TIF")))
       if (crop == "y" || crop == "f" || crop == "u")
       {
-        blu <- crop(blu, ext)
+        swir1 <- crop(swir1, ext)
         if (crop=="f")
         {
-          blu <- mask(blu,shape)
+          swir1 <- mask(swir1,shape)
         }
       }
-      toa_blu <- ((blu * blu_refl_mult) + blu_refl_add)/sin(sun_ele*(pi/180))
-      writeRaster(toa_blu,paste0(directory,"/","toa_blu"),format="GTiff",overwrite=TRUE)
+      toa_swir1 <- ((swir1 * swir1_refl_mult) + swir1_refl_add)/sin(sun_ele*(pi/180))
+      j <- j+1
+      op_bands [[j]] <- toa_swir1
+      op_names [[j]] <- paste0("Raster no.", j, " is SWIR-1 band")
+      #writeRaster(toa_swir1,paste0(op_directory,"/","toa_swir1"),format="GTiff",overwrite=TRUE)
     }
-    if (b1==1)
+
+    if (b7==1)
     {
-      aero <- as.integer(raster(paste0(directory,"/",sat_fold,"_B1.TIF")))
+      swir2 <- as.integer(raster(paste0(directory,"/",sat_fold,"_B7.TIF")))
       if (crop == "y" || crop == "f" || crop == "u")
       {
-        aero <- crop(aero, ext)
+        swir2 <- crop(swir2, ext)
         if (crop=="f")
         {
-          aero <- mask(aero,shape)
+          swir2 <- mask(swir2,shape)
         }
       }
-      toa_aero <- ((aero * aero_refl_mult) + aero_refl_add)/sin(sun_ele*(pi/180))
-      writeRaster(toa_aero,paste0(directory,"/","toa_aero"),format="GTiff",overwrite=TRUE)
+      toa_swir2 <- ((swir2 * swir2_refl_mult) + swir2_refl_add)/sin(sun_ele*(pi/180))
+      j <- j+1
+      op_bands [[j]] <- toa_swir2
+      op_names [[j]] <- paste0("Raster no.", j, " is SWIR-2 band")
+      #writeRaster(toa_swir2,paste0(op_directory,"/","toa_swir2"),format="GTiff",overwrite=TRUE)
     }
+    rm (j)
   }
   ########### Landsat-8 ending ##############
   ########### Landsat-7 starting ##############
   if (satellite=="LE")
   {
+    j <- 0
     if (crop == "u")
     {
       b4 <- raster (paste0 (directory, "/", sat_fold, "_B4.TIF"))
@@ -290,7 +331,10 @@ dn2toa <- function (directory= getwd(), crop = "n", ext2crop = "none",b1=1,b2=1,
       }
       rad_b1 <- ((lmax1-lmin1)/(qcal_max-qcal_min)) * (blu-qcal_min) + lmin1
       toa_blu <- pi * rad_b1 * d^2  / 1970 * sin(sun_ele*(pi/180))
-      writeRaster(toa_blu,paste0(directory,"/","toa_blu"),format="GTiff",overwrite=TRUE)
+      j <- j+1
+      op_bands [[j]] <- toa_blu
+      op_names [[j]] <- paste0("Raster no.", j, " is Blue band")
+      #writeRaster(toa_blu,paste0(op_directory,"/","toa_blu"),format="GTiff",overwrite=TRUE)
     }
     if (b2==1)
     {
@@ -305,7 +349,10 @@ dn2toa <- function (directory= getwd(), crop = "n", ext2crop = "none",b1=1,b2=1,
       }
       rad_b2 <- ((lmax2-lmin2)/(qcal_max-qcal_min)) * (green-qcal_min) + lmin2
       toa_green <- pi * rad_b2 * d^2  / 1842 * sin(sun_ele*(pi/180))
-      writeRaster(toa_green,paste0(directory,"/","toa_green"),format="GTiff",overwrite=TRUE)
+      j <- j+1
+      op_bands [[j]] <- toa_green
+      op_names [[j]] <- paste0("Raster no.", j, " is Green band")
+      #writeRaster(toa_green,paste0(op_directory,"/","toa_green"),format="GTiff",overwrite=TRUE)
     }
 
     if (b3==1)
@@ -321,7 +368,10 @@ dn2toa <- function (directory= getwd(), crop = "n", ext2crop = "none",b1=1,b2=1,
       }
       rad_b3 <- ((lmax3-lmin3)/(qcal_max-qcal_min)) * (red-qcal_min) + lmin3
       toa_red <- pi * rad_b3 * d^2  / 1547 * sin(sun_ele*(pi/180))
-      writeRaster(toa_red,paste0(directory,"/","toa_red"),format="GTiff",overwrite=TRUE)
+      j <- j+1
+      op_bands [[j]] <- toa_red
+      op_names [[j]] <- paste0("Raster no.", j, " is Red band")
+      #writeRaster(toa_red,paste0(op_directory,"/","toa_red"),format="GTiff",overwrite=TRUE)
     }
     if (b4==1)
     {
@@ -336,7 +386,10 @@ dn2toa <- function (directory= getwd(), crop = "n", ext2crop = "none",b1=1,b2=1,
       }
       rad_b4 <- ((lmax4-lmin4)/(qcal_max-qcal_min)) * (nir-qcal_min) + lmin4
       toa_nir <- pi * rad_b4 * d^2  / 1044 * sin(sun_ele*(pi/180))
-      writeRaster(toa_nir,paste0(directory,"/","toa_nir"),format="GTiff",overwrite=TRUE)
+      j <- j+1
+      op_bands [[j]] <- toa_nir
+      op_names [[j]] <- paste0("Raster no.", j, " is NIR band")
+      #writeRaster(toa_nir,paste0(op_directory,"/","toa_nir"),format="GTiff",overwrite=TRUE)
     }
     if (b5==1)
     {
@@ -351,7 +404,10 @@ dn2toa <- function (directory= getwd(), crop = "n", ext2crop = "none",b1=1,b2=1,
       }
       rad_b5 <- ((lmax5-lmin5)/(qcal_max-qcal_min)) * (swir1-qcal_min) + lmin5
       toa_swir1 <- pi * rad_b5 * d^2  / 225.7 * sin(sun_ele*(pi/180))
-      writeRaster(toa_swir1,paste0(directory,"/","toa_swir1"),format="GTiff",overwrite=TRUE)
+      j <- j+1
+      op_bands [[j]] <- toa_swir1
+      op_names [[j]] <- paste0("Raster no.", j, " is SWIR-1 band")
+      #writeRaster(toa_swir1,paste0(op_directory,"/","toa_swir1"),format="GTiff",overwrite=TRUE)
     }
     if (b7==1)
     {
@@ -366,8 +422,12 @@ dn2toa <- function (directory= getwd(), crop = "n", ext2crop = "none",b1=1,b2=1,
       }
       rad_b7 <- ((lmax7-lmin7)/(qcal_max-qcal_min)) * (swir2-qcal_min) + lmin7
       toa_swir2 <- pi * rad_b7 * d^2  / 82.06 * sin(sun_ele*(pi/180))
-      writeRaster(toa_swir2,paste0(directory,"/","toa_swir2"),format="GTiff",overwrite=TRUE)
+      j <- j+1
+      op_bands [[j]] <- toa_swir2
+      op_names [[j]] <- paste0("Raster no.", j, " is SWIR-2 band")
+      #writeRaster(toa_swir2,paste0(op_directory,"/","toa_swir2"),format="GTiff",overwrite=TRUE)
     }
+    rm(j)
   }
   ############## Landsat ETM ending ##################
   ############## Landsat TM starting ##################
@@ -458,7 +518,10 @@ dn2toa <- function (directory= getwd(), crop = "n", ext2crop = "none",b1=1,b2=1,
       }
       rad_b1 <- ((lmax1-lmin1)/(qcal_max-qcal_min)) * (blu-qcal_min) + lmin1
       toa_blu <- pi * rad_b1 * d^2  / 1958 * sin(sun_ele*(pi/180))
-      writeRaster(toa_blu,paste0(directory,"/","toa_blu"),format="GTiff",overwrite=TRUE)
+      j <- j+1
+      op_bands [[j]] <- toa_blu
+      op_names [[j]] <- paste0("Raster no.", j, " is Blue band")
+      #writeRaster(toa_blu,paste0(op_directory,"/","toa_blu"),format="GTiff",overwrite=TRUE)
     }
     if (b2==1)
     {
@@ -473,7 +536,10 @@ dn2toa <- function (directory= getwd(), crop = "n", ext2crop = "none",b1=1,b2=1,
       }
       rad_b2 <- ((lmax2-lmin2)/(qcal_max-qcal_min)) * (green-qcal_min) + lmin2
       toa_green <- pi * rad_b2 * d^2  / esun2 * sin(sun_ele*(pi/180))
-      writeRaster(toa_green,paste0(directory,"/","toa_green"),format="GTiff",overwrite=TRUE)
+      j <- j+1
+      op_bands [[j]] <- toa_green
+      op_names [[j]] <- paste0("Raster no.", j, " is Green band")
+      #writeRaster(toa_green,paste0(op_directory,"/","toa_green"),format="GTiff",overwrite=TRUE)
     }
 
     if (b3==1)
@@ -489,7 +555,10 @@ dn2toa <- function (directory= getwd(), crop = "n", ext2crop = "none",b1=1,b2=1,
       }
       rad_b3 <- ((lmax3-lmin3)/(qcal_max-qcal_min)) * (red-qcal_min) + lmin3
       toa_red <- pi * rad_b3 * d^2  / esun3 * sin(sun_ele*(pi/180))
-      writeRaster(toa_red,paste0(directory,"/","toa_red"),format="GTiff",overwrite=TRUE)
+      j <- j+1
+      op_bands [[j]] <- toa_red
+      op_names [[j]] <- paste0("Raster no.", j, " is Red band")
+      #writeRaster(toa_red,paste0(op_directory,"/","toa_red"),format="GTiff",overwrite=TRUE)
     }
     if (b4==1)
     {
@@ -504,14 +573,18 @@ dn2toa <- function (directory= getwd(), crop = "n", ext2crop = "none",b1=1,b2=1,
       }
       rad_b4 <- ((lmax4-lmin4)/(qcal_max-qcal_min)) * (nir-qcal_min) + lmin4
       toa_nir <- pi * rad_b4 * d^2  / esun4 * sin(sun_ele*(pi/180))
-      writeRaster(toa_nir,paste0(directory,"/","toa_nir"),format="GTiff",overwrite=TRUE)
+
+      j <- j+1
+      op_bands [[j]] <- toa_nir
+      op_names [[j]] <- paste0("Raster no.", j, " is NIR band")
+      #writeRaster(toa_nir,paste0(op_directory,"/","toa_nir"),format="GTiff",overwrite=TRUE)
     }
     if (b5==1)
     {
       swir1 <- raster(paste0(directory,"/",sat_fold,"_B5.TIF"))
       if (crop == "y" || crop == "f" || crop == "u")
       {
-        swir <- crop(swir1,ext)
+        swir1 <- crop(swir1,ext)
         if (crop=="f")
         {
           swir1 <- mask(swir1,shape)
@@ -519,7 +592,10 @@ dn2toa <- function (directory= getwd(), crop = "n", ext2crop = "none",b1=1,b2=1,
       }
       rad_b5 <- ((lmax5-lmin5)/(qcal_max-qcal_min)) * (swir1-qcal_min) + lmin5
       toa_swir1 <- pi * rad_b5 * d^2  / esun5 * sin(sun_ele*(pi/180))
-      writeRaster(toa_swir1,paste0(directory,"/","toa_swir1"),format="GTiff",overwrite=TRUE)
+      j <- j+1
+      op_bands [[j]] <- toa_swir1
+      op_names [[j]] <- paste0("Raster no.", j, " is SWIR-1 band")
+      #writeRaster(toa_swir1,paste0(op_directory,"/","toa_swir1"),format="GTiff",overwrite=TRUE)
     }
     if (b7==1)
     {
@@ -534,11 +610,18 @@ dn2toa <- function (directory= getwd(), crop = "n", ext2crop = "none",b1=1,b2=1,
       }
       rad_b7 <- ((lmax7-lmin7)/(qcal_max-qcal_min)) * (swir2-qcal_min) + lmin7
       toa_swir2 <- pi * rad_b7 * d^2  / esun7 * sin(sun_ele*(pi/180))
-      writeRaster(toa_swir2,paste0(directory,"/","toa_swir2"),format="GTiff",overwrite=TRUE)
+      j <- j+1
+      op_bands [[j]] <- toa_swir2
+      op_names [[j]] <- paste0("Raster no.", j, " is SWIR-2 band")
+      #writeRaster(toa_swir2,paste0(op_directory,"/","toa_swir2"),format="GTiff",overwrite=TRUE)
     }
   }
+op <- list()
+op [[1]] <- op_names
+op [[2]] <- op_bands
+return (op)
   ######## Landsat TM ending ############
-print("Program finished, results will be located in the satellite folder")
+cat("\nProgram finished, results will be located in the satellite folder")
 }
 ############ TOA FINISHED #######################
 # ESUN values are obtained from https://landsat.usgs.gov/esun

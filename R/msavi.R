@@ -4,7 +4,7 @@
 #' Advantage of this index is that, it increases the dynamic range of the vegetation signal while further minimizing the soil background influences,
 #' resulting in greater vegetation sensitivity as defined by a 'vegetation signal' to 'soil noise' ratio.
 #' @param ext2crop,crop,directory Same as mentioned in \code{\link[ASIP]{arvi}}.
-#' @return File named msavi_'date of satellite image acqisition'.tif in the input folder
+#' @return Computed MSAVI product
 #' @note 1. MSAVI=((2r_nir + 1) - ((2r_nir + 1)^2 - 8(r_nir - r_red))^0.5)/2
 #'
 #' where, "r_" denotes TOA reflectance band.
@@ -21,7 +21,7 @@
 #' # User may define paths directly like "/home/ur_folder" or "C:/ur_folder"
 #' path <- system.file ("TM_sample", package = "ASIP")
 #' shapefil <- paste0 (path, "/test.shp")
-#' msavi (directory = path, crop = "y", ext2crop = shapefil)
+#' op <- msavi (directory = path, crop = "y", ext2crop = shapefil)
 msavi <- function(directory = getwd(), crop = "n", ext2crop = "none")
 {
   # If the directory is not set
@@ -286,7 +286,8 @@ msavi <- function(directory = getwd(), crop = "n", ext2crop = "none")
   msavi_c1= (2*toa_nir)+1
   msavi_c2= ((2*toa_nir)+1)^2
   msavi_c3= (msavi_c2 - (8 * (toa_nir-toa_red)))^0.5
-  msavi=(msavi_c1 - msavi_c3)/2
-  writeRaster(msavi,paste0(directory,"/","msavi_",data_aq),format="GTiff", overwrite=TRUE)
-  print("Program completed, output is named as 'msavi_[date of data acquisition].tif' in satellite image folder")
+  msavi <- (msavi_c1 - msavi_c3)/2
+  #writeRaster(msavi,paste0(directory,"/","msavi_",data_aq),format="GTiff", overwrite=TRUE)
+  return(msavi)
+  cat ("\nProgram completed, output is produced as a variable named 'msavi'")
 }

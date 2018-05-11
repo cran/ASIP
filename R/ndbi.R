@@ -2,7 +2,7 @@
 #'
 #' Normalized Difference Built-up Index (NDBI) is used for mapping built-up areas
 #' @param ext2crop,crop,directory Same as mentioned in \code{\link[ASIP]{arvi}}.
-#' @return File named ndbi_'date of satellite image acqisition'.tif in the input folder
+#' @return Computed NDBI product
 #' @note 1. NDBI= (r_swir1 - r_nir)/ (r_swir1 + r_nir)
 #'
 #' where, "r_" denotes TOA reflectance band.
@@ -19,7 +19,7 @@
 #' # User may define paths directly like "/home/ur_folder" or "C:/ur_folder"
 #' path <- system.file ("TM_sample", package = "ASIP")
 #' shapefil <- paste0 (path, "/test.shp")
-#' ndbi (directory = path, crop = "y", ext2crop = shapefil)
+#' op <- ndbi (directory = path, crop = "y", ext2crop = shapefil)
 # ndbi function
 ndbi <- function(directory = getwd(), crop = "n", ext2crop = "none")
 {
@@ -284,6 +284,7 @@ ndbi <- function(directory = getwd(), crop = "n", ext2crop = "none")
   }
   ######## Landsat TM ending ############
   ndbi <- (toa_swir1 - toa_nir)/(toa_nir + toa_swir1)
-  writeRaster(ndbi,paste0(directory,"/","ndvi_",data_aq),format="GTiff", overwrite=TRUE)
-  print("Program completed, output is named as 'ndbi_[date of data acquisition].tif' in satellite image folder")
+  return(ndbi)
+  #writeRaster(ndbi,paste0(directory,"/","ndvi_",data_aq),format="GTiff", overwrite=TRUE)
+  cat ("\nProgram completed, a new variable named 'ndbi' is produced")
 }

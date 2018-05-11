@@ -10,7 +10,7 @@ ndbi(directory = getwd(), crop = "n", ext2crop = "none")
 \item{ext2crop, crop, directory}{Same as mentioned in \code{\link[ASIP]{arvi}}.}
 }
 \value{
-File named ndbi_'date of satellite image acqisition'.tif in the input folder
+Computed NDBI product
 }
 \description{
 Normalized Difference Built-up Index (NDBI) is used for mapping built-up areas
@@ -29,7 +29,7 @@ library (rgdal)
 # User may define paths directly like "/home/ur_folder" or "C:/ur_folder"
 path <- system.file ("TM_sample", package = "ASIP")
 shapefil <- paste0 (path, "/test.shp")
-ndbi (directory = path, crop = "y", ext2crop = shapefil)
+op <- ndbi (directory = path, crop = "y", ext2crop = shapefil)
 }
 \references{
 \href{http://www.tandfonline.com/doi/abs/10.1080/01431160304987}{Zha Y, Gao J and Ni S (2003) Use of normalized difference built-up index in automatically mapping urban areas from TM imagery. International Journal of Remote Sensing, 24 (3), pp:583-594. doi:10.1080/01431160304987.}

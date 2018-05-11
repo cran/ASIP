@@ -6,7 +6,7 @@
 #' required to understand the role of soil effects on reflectance
 #' measured in the all-optical spectrum (Ceccato et, al. 2002).
 #' @param ext2crop,crop,directory Same as mentioned in \code{\link[ASIP]{arvi}}.
-#' @return File named gvmi_'date of satellite image acqisition'.tif in the input folder
+#' @return Computed GVMI product
 #' @note 1. GVMI = ((r_nir + 0.1)- (r_swir2+0.2))/ ((r_nir + 0.1)- (r_swir2+0.2))
 #'
 #' where, "r_" denotes TOA reflectance band.
@@ -22,7 +22,7 @@
 #' # User may define paths directly like "/home/ur_folder" or "C:/ur_folder"
 #' path <- system.file ("TM_sample", package = "ASIP")
 #' shapefil <- paste0 (path, "/test.shp")
-#' gvmi (directory = path, crop = "y", ext2crop = shapefil)
+#' op <- gvmi (directory = path, crop = "y", ext2crop = shapefil)
 # Global Vegetation Moisture Index (GVMI) from DN bands
 gvmi <- function(directory = getwd(), crop = "n", ext2crop = "none")
 {
@@ -283,7 +283,8 @@ gvmi <- function(directory = getwd(), crop = "n", ext2crop = "none")
     toa_nir <- pi * rad_b4 * d^2  / esun4 * sin(sun_ele*(pi/180))
   }
   ######## Landsat TM ending ############
-  gvmi=((toa_nir+0.1)-(toa_swir2+0.02))/((toa_nir+0.1)+(toa_swir2+0.02))
-  writeRaster(gvmi,paste0(directory,"/","gvmi_",data_aq),format="GTiff", overwrite=TRUE)
-  print("Program completed, output is named as 'gvmi_[date of data acquisition].tif' in satellite image folder")
+  gvmi <- ((toa_nir+0.1)-(toa_swir2+0.02))/((toa_nir+0.1)+(toa_swir2+0.02))
+  #writeRaster(gvmi,paste0(directory,"/","gvmi_",data_aq),format="GTiff", overwrite=TRUE)
+  return(gvmi)
+  cat ("\nProgram completed, output is produced as a variable named 'gvmi'")
 }

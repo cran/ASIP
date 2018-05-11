@@ -5,10 +5,12 @@
 \title{Normalized Difference Vegetation Index}
 \usage{
 ndvi(directory = getwd(), crop = "n", ext2crop = "none",
-  emissivity = "n")
+  op_directory = directory, emissivity = "n")
 }
 \arguments{
 \item{ext2crop, crop, directory}{Same as mentioned in \code{\link[ASIP]{arvi}}.}
+
+\item{op_directory}{Specify the output directory (within double quotes). By default the input satellite image directory will be selected as the output directory.}
 
 \item{emissivity}{Assign value "y" to get the emissivity of the surface as a seperate raster file.}
 }

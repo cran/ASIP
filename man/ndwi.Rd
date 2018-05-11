@@ -10,7 +10,7 @@ ndwi(directory = getwd(), crop = "n", ext2crop = "none")
 \item{ext2crop, crop, directory}{Same as mentioned in \code{\link[ASIP]{arvi}}.}
 }
 \value{
-File named ndwi_'date of satellite image acqisition'.tif in the input folder
+Computed NDWI product
 }
 \description{
 Normalized Difference Water Index (NDWI) is used to monitor changes related to water content in water bodies proposed by McFeeters (1996).
@@ -32,7 +32,7 @@ library (rgdal)
 # User may define paths directly like "/home/ur_folder" or "C:/ur_folder"
 path <- system.file ("TM_sample", package = "ASIP")
 shapefil <- paste0 (path, "/test.shp")
-ndwi (directory = path, crop = "y", ext2crop = shapefil)
+op <- ndwi (directory = path, crop = "y", ext2crop = shapefil)
 }
 \references{
 \href{http://www.tandfonline.com/doi/abs/10.1080/01431169608948714}{McFeeters, S.K. (1996) The Use of the Normalized Difference Water Index (NDWI) in the Delineation of Open Water Features. International Journal of Remote Sensing, 17, 1425-1432.

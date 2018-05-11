@@ -5,11 +5,13 @@
 \title{Produce multiple indices}
 \usage{
 multi.indices(directory = getwd(), crop = "n", ext2crop = "none",
-  arvi = 0, gamma = 1, gemi = 0, gvmi = 0, msavi = 0, ndbi = 0,
-  ndvi = 1, ndwi = 0, pavi = 0, all = 0)
+  op_directory = directory, arvi = 0, gamma = 1, gemi = 0, gvmi = 0,
+  msavi = 0, ndbi = 0, ndvi = 1, ndwi = 0, pavi = 0, all = 0)
 }
 \arguments{
 \item{ext2crop, crop, directory}{Same as mentioned in \code{\link[ASIP]{arvi}}.}
+
+\item{op_directory}{Specify the output directory <within double quotes>. By default the input satellite image directory will be selected as the output directory.}
 
 \item{arvi}{This product won't be produced by default. To produce this product, assign value 1.
 This product is same as that of the output from \code{\link[ASIP]{arvi}}. Only difference is, this function intakes
@@ -67,5 +69,5 @@ library (rgdal)
 # User may define paths directly like "/home/ur_folder" or "C:/ur_folder"
 path <- system.file ("TM_sample", package = "ASIP")
 shapefil <- paste0 (path, "/test.shp")
-dn2toa (path, crop = "f", ext2crop = shapefil, b3=0, b4=0, b5=0, b6 = 0, b7 = 0)
+multi.indices (path, crop = "f", ext2crop = shapefil, msavi =1, ndvi = 0)
 }

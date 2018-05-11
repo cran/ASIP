@@ -10,7 +10,7 @@ gvmi(directory = getwd(), crop = "n", ext2crop = "none")
 \item{ext2crop, crop, directory}{Same as mentioned in \code{\link[ASIP]{arvi}}.}
 }
 \value{
-File named gvmi_'date of satellite image acqisition'.tif in the input folder
+Computed GVMI product
 }
 \description{
 Global Vegetation Moisture Index (GVMI) is suitable for retrieving vegetation water content
@@ -32,7 +32,7 @@ library (rgdal)
 # User may define paths directly like "/home/ur_folder" or "C:/ur_folder"
 path <- system.file ("TM_sample", package = "ASIP")
 shapefil <- paste0 (path, "/test.shp")
-gvmi (directory = path, crop = "y", ext2crop = shapefil)
+op <- gvmi (directory = path, crop = "y", ext2crop = shapefil)
 }
 \references{
 \href{http://www.sciencedirect.com/science/article/pii/S0034425702000378}{Ceccato P, Gobron N, Flasse S, Pinty B and Tarantola S (2002) Designing a spectral index to estimate vegetation water content from remote sensing data: Part 1: Theoretical approach. Remote Sensing of Environment, 82(2-3), pp:188-197. doi:10.1016/S0034-4257(02)00037-8.}

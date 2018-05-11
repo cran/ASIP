@@ -2,7 +2,7 @@
 #'
 #' Global Environmental Monitoring Index (GEMI) is a vegetation based index designed to
 #' reduce the effects of atmosperic effects.
-#' @return File named gemi_'date of satellite image acqisition'.tif in the input folder
+#' @return Computed GEMI product
 #' @note 1. GEMI = n (1 - 0.25n) - ((r_red - 0.125)/(1 - r_red))
 #'
 #' where, n= (2 (r_nir^2 - r_red^2) + 1.5 r_nir + 0.5 r_red)/ (r_nir + r_red + 0.5)
@@ -22,7 +22,7 @@
 #' # User may define paths directly like "/home/ur_folder" or "C:/ur_folder"
 #' path <- system.file ("TM_sample", package = "ASIP")
 #' shapefil <- paste0 (path, "/test.shp")
-#' gemi (directory = path, crop = "y", ext2crop = shapefil)
+#' op <- gemi (directory = path, crop = "y", ext2crop = shapefil)
 # GEMI (Global Environmental Monitoring Index) from DN bands
 gemi <- function (directory = getwd(), crop = "n", ext2crop = "none")
 {
@@ -289,6 +289,7 @@ gemi <- function (directory = getwd(), crop = "n", ext2crop = "none")
 
   gem_c1 <- (2* ((toa_nir^2) - (toa_red^2)) + (1.5 * toa_nir) + (0.5 * toa_red))/ (toa_nir+toa_red+0.5)
   gemi <- gem_c1 * (1- (0.25* gem_c1)) - ((toa_red-0.125)/(1-toa_red))
-  writeRaster(gemi,paste0(directory,"/","gemi_",data_aq),format="GTiff", overwrite=TRUE)
-  print("Program completed, output is named as 'gemi_[date of data acquisition].tif' in satellite image folder")
+  #writeRaster(gemi,paste0(directory,"/","gemi_",data_aq),format="GTiff", overwrite=TRUE)
+  return (gemi)
+  cat("\nProgram completed, output is produced as a variable named 'gemi'")
 }
